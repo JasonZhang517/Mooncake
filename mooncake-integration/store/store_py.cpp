@@ -909,6 +909,21 @@ int DistributedObjectStore::register_buffer(void *buffer, size_t size) {
     return 0;
 }
 
+int DistributedObjectStore::unregister_buffer(void *buffer) {
+    if (!client_) {
+        LOG(ERROR) << "Client is not initialized";
+        return 1;
+    }
+    auto unregister_result =
+        client_->unregisterLocalMemory(buffer, false);
+    if (!unregister_result) {
+        LOG(ERROR) << "Unregister buffer failed with error: "
+                   << toString(unregister_result.error());
+        return toInt(unregister_result.error());
+    }
+    return 0;
+}
+
 int DistributedObjectStore::get_into(const std::string &key, void *buffer,
                                      size_t size) {
     // NOTE: The buffer address must be previously registered with
@@ -1334,7 +1349,10 @@ int DistributedObjectStore::put_tensor(const std::string &key, pybind11::object 
 
         this->register_buffer(reinterpret_cast<void*>(data_ptr), buffer_size);
         // Use put_from for direct memory access (zero-copy)
-        return this->put_from(key, reinterpret_cast<void*>(data_ptr), buffer_size);
+        int result = this->put_from(key, reinterpret_cast<void*>(data_ptr), buffer_size);
+        this->unregister_buffer(reinterpret_cast<void*>(data_ptr));
+        return result;
+
     } catch (const pybind11::error_already_set &e) {
         LOG(ERROR) << "Failed to access tensor data: " << e.what();
         return -1;
@@ -1418,6 +1436,16 @@ PYBIND11_MODULE(store, m) {
             },
             py::arg("buffer_ptr"), py::arg("size"),
             "Register a memory buffer for direct access operations")
+        .def(
+            "unregister_buffer",
+            [](DistributedObjectStore &self, uintptr_t buffer_ptr) {
+                // Unregister memory buffer
+                void *buffer = reinterpret_cast<void *>(buffer_ptr);
+                py::gil_scoped_release release;
+                return self.unregister_buffer(buffer);
+            },
+            py::arg("buffer_ptr"), "Unregister a previously registered memory "
+                                   "buffer for direct access operations")
         .def(
             "get_into",
             [](DistributedObjectStore &self, const std::string &key,
