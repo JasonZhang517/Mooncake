@@ -19,7 +19,7 @@ endif()
 
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-add_library(transfer_engine ${ENGINE_SOURCES} $<TARGET_OBJECTS:transport>)
+add_library(transfer_engine ${ENGINE_SOURCES} $<TARGET_OBJECTS:transport> $<TARGET_OBJECTS:rdma_transport> $<TARGET_OBJECTS:coro_rpc_connector>)
 if (BUILD_SHARED_LIBS)
   install(TARGETS transfer_engine DESTINATION lib)
 endif()

@@ -6,7 +6,7 @@ find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 add_subdirectory(rdma_transport)
 add_subdirectory(coro_rpc_connector)
 
-add_library(transport OBJECT ${XPORT_SOURCES} $<TARGET_OBJECTS:rdma_transport> $<TARGET_OBJECTS:coro_rpc_connector>)
+add_library(transport OBJECT ${XPORT_SOURCES})
 target_link_libraries(transport PRIVATE JsonCpp::JsonCpp yalantinglibs::yalantinglibs glog::glog pthread ${Python3_LIBRARIES})
 target_include_directories(transport PRIVATE ${Python3_INCLUDE_DIRS})
 

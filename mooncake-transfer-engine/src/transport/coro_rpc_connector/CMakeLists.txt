@@ -2,6 +2,7 @@ file(GLOB CORO_RPC_SOURCES "*.cpp")
 
 # Find Python for pybind11 support
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+find_package(pybind11 REQUIRED)
 
 add_library(coro_rpc_connector OBJECT ${CORO_RPC_SOURCES})
 
