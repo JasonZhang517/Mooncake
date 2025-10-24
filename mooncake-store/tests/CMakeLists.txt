@@ -49,3 +49,130 @@ target_link_libraries(stress_workload_test PUBLIC
     gflags
     pthread
 )
+<<<<<<< Updated upstream
+=======
+
+add_executable(posix_file_test posix_file_test.cpp)
+target_link_libraries(posix_file_test PUBLIC
+    mooncake_store
+    cachelib_memory_allocator
+    glog
+    gtest
+    gtest_main
+    pthread
+)
+add_test(NAME posix_file_test COMMAND posix_file_test)
+
+add_executable(thread_pool_test thread_pool_test.cpp)
+target_link_libraries(thread_pool_test PUBLIC
+    mooncake_store
+    cachelib_memory_allocator
+    glog
+    gtest
+    gtest_main
+    pthread
+)
+add_test(NAME thread_pool_test COMMAND thread_pool_test)
+
+add_executable(transfer_task_test transfer_task_test.cpp)
+target_link_libraries(transfer_task_test PUBLIC
+    mooncake_store
+    cachelib_memory_allocator
+    glog
+    gtest
+    gtest_main
+    pthread
+)
+add_test(NAME transfer_task_test COMMAND transfer_task_test)
+
+add_executable(segment_test segment_test.cpp)
+target_link_libraries(segment_test PUBLIC
+    mooncake_store
+    cachelib_memory_allocator
+    glog
+    gtest
+    gtest_main
+    pthread
+)
+add_test(NAME segment_test COMMAND segment_test)
+
+add_executable(offset_allocator_test offset_allocator_test.cpp)
+target_link_libraries(offset_allocator_test PUBLIC
+    mooncake_store
+    cachelib_memory_allocator
+    glog
+    gtest
+    gtest_main
+    pthread
+)
+add_test(NAME offset_allocator_test COMMAND offset_allocator_test)
+
+add_executable(utils_test utils_test.cpp)
+target_link_libraries(utils_test PUBLIC
+    mooncake_store
+    cachelib_memory_allocator
+    glog
+    gtest
+    gtest_main
+    pthread
+)
+add_test(NAME utils_test COMMAND utils_test)
+
+add_executable(client_buffer_test client_buffer_test.cpp)
+target_link_libraries(client_buffer_test PUBLIC
+    mooncake_store
+    cachelib_memory_allocator
+    glog
+    gtest
+    gtest_main
+    pthread
+)
+add_test(NAME client_buffer_test COMMAND client_buffer_test)
+
+add_executable(pybind_client_test pybind_client_test.cpp)
+target_link_libraries(pybind_client_test PUBLIC
+    mooncake_store
+    cachelib_memory_allocator
+    ${ETCD_WRAPPER_LIB}
+    glog
+    gtest
+    gtest_main
+    pthread
+)
+add_test(NAME pybind_client_test COMMAND pybind_client_test)
+
+add_executable(client_metrics_test client_metrics_test.cpp)
+target_link_libraries(client_metrics_test PUBLIC
+    mooncake_store
+    cachelib_memory_allocator
+    glog
+    gtest
+    gtest_main
+    pthread
+)
+add_test(NAME client_metrics_test COMMAND client_metrics_test)
+
+add_executable(serializer_test serializer_test.cpp)
+target_link_libraries(serializer_test PUBLIC
+    mooncake_store
+    cachelib_memory_allocator
+    glog
+    gtest
+    gtest_main
+    pthread
+)
+add_test(NAME serializer_test COMMAND serializer_test)
+
+add_executable(fake_client_test fake_client_test.cpp)
+target_link_libraries(fake_client_test PUBLIC
+    mooncake_store
+    cachelib_memory_allocator
+    glog
+    gtest
+    gtest_main
+    pthread
+)
+add_test(NAME fake_client_test COMMAND fake_client_test)
+
+add_subdirectory(e2e)
+>>>>>>> Stashed changes

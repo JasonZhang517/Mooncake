@@ -708,6 +708,128 @@ python -m mooncake.mooncake_store_service --config=[config_path] --port=8081
 
 ## Example Code
 
+### FakeClient for Testing
+
+Mooncake Store provides `FakeClient` as a testing utility that demonstrates control-data plane separation by embedding an actual Mooncake Store Client instance for real data operations.
+
+#### Overview
+
+`FakeClient` is designed for:
+- **Testing and Development**: Enables unit testing without deploying separate services
+- **Architecture Validation**: Demonstrates data operation delegation through embedded client
+- **Integration Testing**: Provides a testbed for control-data plane decoupling concepts
+
+Unlike the production `Client` class which includes both control plane (metadata management) and data plane (transfer engine, storage backend), `FakeClient` uses an embedded `Client` instance to perform actual storage operations locally.
+
+#### C++ API
+
+The main APIs of `FakeClient` include:
+
+```cpp
+// Initialize with Mooncake Store configuration
+ErrorCode Init(const std::string& local_hostname,
+               const std::string& metadata_connstring,
+               const std::string& protocol,
+               const std::string& master_server_entry);
+
+// Data operations using embedded Client
+ErrorCode Read(const std::string& object_key, std::vector<Slice>& slices);
+ErrorCode Write(const std::string& object_key, std::vector<Slice>& slices,
+                const ReplicateConfig& config);
+tl::expected<std::vector<Replica::Descriptor>, ErrorCode> Query(const std::string& object_key);
+ErrorCode Remove(const std::string& object_key);
+
+// Batch operations
+std::vector<tl::expected<void, ErrorCode>> BatchRead(
+    const std::vector<std::string>& object_keys,
+    std::unordered_map<std::string, std::vector<Slice>>& slices_map);
+std::vector<tl::expected<void, ErrorCode>> BatchWrite(
+    const std::vector<std::string>& object_keys,
+    std::vector<std::vector<Slice>>& batched_slices,
+    const ReplicateConfig& config);
+```
+
+#### Building and Testing
+
+FakeClient is automatically built with Mooncake Store. To build and run tests:
+
+```bash
+cd /path/to/Mooncake/build
+cmake .. -DCMAKE_BUILD_TYPE=Debug -DWITH_STORE=ON -DSTORE_USE_ETCD=ON
+make -j$(nproc) fake_client_test
+```
+
+Run unit tests (no external services required):
+```bash
+cd build/mooncake-store/tests
+./fake_client_test
+```
+
+The test suite includes:
+- Construction/destruction validation
+- Uninitialized operation error handling
+- Batch operation parameter validation
+- Thread-safety verification (4 threads × 10 concurrent operations)
+- Multiple client instance creation
+
+For integration tests requiring running services (etcd, master):
+```bash
+# Start etcd and master service first, then:
+./fake_client_test --gtest_also_run_disabled_tests
+```
+
+#### Usage Example
+
+```cpp
+#include "fake_client.h"
+
+using namespace mooncake;
+
+int main() {
+    auto fake_client = std::make_unique<FakeClient>();
+    
+    // Initialize with same parameters as regular Client
+    ErrorCode ec = fake_client->Init(
+        "127.0.0.1:12345",           // local hostname
+        "etcd://127.0.0.1:2379",      // metadata connection string
+        "tcp",                        // protocol
+        "127.0.0.1:50051"            // master server entry
+    );
+    
+    if (ec != ErrorCode::OK) {
+        LOG(ERROR) << "Failed to initialize FakeClient";
+        return -1;
+    }
+    
+    // Write data
+    std::vector<char> data(1024, 'A');
+    Slice slice(data.data(), data.size());
+    std::vector<Slice> slices = {slice};
+    
+    ReplicateConfig config;
+    config.replica_num = 1;
+    
+    ec = fake_client->Write("test_key", slices, config);
+    if (ec != ErrorCode::OK) {
+        LOG(ERROR) << "Write failed";
+        return -1;
+    }
+    
+    // Read data back
+    std::vector<Slice> read_slices;
+    ec = fake_client->Read("test_key", read_slices);
+    if (ec != ErrorCode::OK) {
+        LOG(ERROR) << "Read failed";
+        return -1;
+    }
+    
+    LOG(INFO) << "FakeClient test completed successfully";
+    return 0;
+}
+```
+
+**Note**: FakeClient is primarily intended for testing and development. For production deployments, use the standard `Client` class.
+
 #### Python Usage Example
 We provide a reference example `distributed_object_store_provider.py`, located in the `mooncake-store/tests` directory. To check if the related components are properly installed, you can run etcd and Master Service (`mooncake_master`) in the background on the same server, and then execute this Python program in the foreground. It should output a successful test result.
 
