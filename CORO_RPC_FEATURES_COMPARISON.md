@@ -64,9 +64,9 @@ The following coro_rpc files are present in **both** pr1-coro-rpc-core and coro_
 
 **Changes from main:** 13 files, 1,393 insertions (+), 15 deletions (-)
 
-### 3. Content Verification: Cryptographic Checksums
+### 3. Content Verification: File Checksums
 
-I verified the coro_rpc files are byte-for-byte identical using MD5 checksums:
+I verified the coro_rpc files are byte-for-byte identical using MD5 checksums (for file comparison only):
 
 ```
 File                                | MD5 Checksum                      | Status
@@ -100,7 +100,7 @@ The coro_rpc_communicator branch has additional changes **not related to coro_rp
 
 #### Files with differences (all build-related, not coro_rpc features):
 1. **CMakeLists.txt** (root)
-   - Enhanced pybind11 discovery: system → vendored → FetchContent
+   - Enhanced pybind11 discovery: system -> vendored -> FetchContent
    - Not specific to coro_rpc, general Python bindings improvement
 
 2. **mooncake-transfer-engine/src/CMakeLists.txt**
